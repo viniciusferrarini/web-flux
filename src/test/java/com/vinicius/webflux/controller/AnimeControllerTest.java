@@ -1,7 +1,7 @@
-package com.vinicius.webflux.service;
+package com.vinicius.webflux.controller;
 
 import com.vinicius.webflux.domain.Anime;
-import com.vinicius.webflux.repository.AnimeRepository;
+import com.vinicius.webflux.service.AnimeService;
 import com.vinicius.webflux.util.AnimeCreator;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,7 +10,6 @@ import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.web.server.ResponseStatusException;
 import reactor.blockhound.BlockHound;
 import reactor.blockhound.BlockingOperationError;
 import reactor.core.publisher.Flux;
@@ -22,13 +21,13 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 @ExtendWith(SpringExtension.class)
-class AnimeServiceTest {
+class AnimeControllerTest {
 
     @InjectMocks
-    private AnimeService animeService;
+    private AnimeController animeController;
 
     @Mock
-    private AnimeRepository animeRepositoryMock;
+    private AnimeService animeServiceMock;
 
     private final Anime anime = AnimeCreator.createValidAnime();
 
@@ -39,20 +38,20 @@ class AnimeServiceTest {
 
     @BeforeEach
     public void setUp() {
-        BDDMockito.when(animeRepositoryMock.findAll())
+        BDDMockito.when(animeServiceMock.findAll())
                 .thenReturn(Flux.just(anime));
 
-        BDDMockito.when(animeRepositoryMock.findById(ArgumentMatchers.anyInt()))
+        BDDMockito.when(animeServiceMock.findById(ArgumentMatchers.anyInt()))
                 .thenReturn(Mono.just(anime));
 
-        BDDMockito.when(animeRepositoryMock.save(AnimeCreator.createAnimeToBeSaved()))
+        BDDMockito.when(animeServiceMock.save(AnimeCreator.createAnimeToBeSaved()))
                 .thenReturn(Mono.just(anime));
 
-        BDDMockito.when(animeRepositoryMock.delete(ArgumentMatchers.any(Anime.class)))
+        BDDMockito.when(animeServiceMock.delete(ArgumentMatchers.anyInt()))
                 .thenReturn(Mono.empty());
 
-        BDDMockito.when(animeRepositoryMock.save(AnimeCreator.createValidAnime()))
-                .thenReturn(Mono.just(anime));
+        BDDMockito.when(animeServiceMock.update(AnimeCreator.createValidAnime()))
+                .thenReturn(Mono.empty());
 
     }
 
@@ -75,7 +74,7 @@ class AnimeServiceTest {
     @Test
     @DisplayName("findAll returns a flux of anime")
     void findAll_ReturnFluxAnime_WhenSuccessful() {
-        StepVerifier.create(animeService.findAll())
+        StepVerifier.create(animeController.listAll())
                 .expectSubscription()
                 .expectNext(anime)
                 .verifyComplete();
@@ -84,23 +83,10 @@ class AnimeServiceTest {
     @Test
     @DisplayName("findById returns Mono with anime when it exists")
     void findById_ReturnMonoAnime_WhenSuccessful() {
-        StepVerifier.create(animeService.findById(1))
+        StepVerifier.create(animeController.findById(1))
                 .expectSubscription()
                 .expectNext(anime)
                 .verifyComplete();
-    }
-
-    @Test
-    @DisplayName("findById returns Mono error when anime does not exists")
-    void findById_ReturnMonoError_WhenEmptyMonoIsReturned() {
-
-        BDDMockito.when(animeRepositoryMock.findById(ArgumentMatchers.anyInt()))
-                .thenReturn(Mono.empty());
-
-        StepVerifier.create(animeService.findById(1))
-                .expectSubscription()
-                .expectError(ResponseStatusException.class)
-                .verify();
     }
 
     @Test
@@ -109,7 +95,7 @@ class AnimeServiceTest {
 
         Anime animeToBeSaved = AnimeCreator.createAnimeToBeSaved();
 
-        StepVerifier.create(animeService.save(animeToBeSaved))
+        StepVerifier.create(animeController.save(animeToBeSaved))
                 .expectSubscription()
                 .expectNext(anime)
                 .verifyComplete();
@@ -118,44 +104,17 @@ class AnimeServiceTest {
     @Test
     @DisplayName("delete removes the anime when successful")
     void delete_RemovesAnime_WhenSuccessful() {
-        StepVerifier.create(animeService.delete(1))
+        StepVerifier.create(animeController.delete(1))
                 .expectSubscription()
                 .verifyComplete();
-    }
-
-    @Test
-    @DisplayName("delete returns Mono error when anime does not exists")
-    void delete_ReturnMonoError_WhenEmptyMonoIsReturned() {
-
-        BDDMockito.when(animeRepositoryMock.findById(ArgumentMatchers.anyInt()))
-                .thenReturn(Mono.empty());
-
-        StepVerifier.create(animeService.delete(1))
-                .expectSubscription()
-                .expectError(ResponseStatusException.class)
-                .verify();
     }
 
     @Test
     @DisplayName("update save updated anime and returns empty mono when successful")
     void update_SaveUpdateAnime_WhenSuccessful() {
-        StepVerifier.create(animeService.update(AnimeCreator.createValidAnime()))
+        StepVerifier.create(animeController.update(1, AnimeCreator.createValidAnime()))
                 .expectSubscription()
                 .verifyComplete();
-    }
-
-    @Test
-    @DisplayName("update returns mono error when anime does not exists")
-    void update_ReturnMonoError_WhenEmptyMonoIsReturned() {
-
-        BDDMockito.when(animeRepositoryMock.findById(ArgumentMatchers.anyInt()))
-                .thenReturn(Mono.empty());
-
-        StepVerifier.create(animeService.update(AnimeCreator.createValidAnime()))
-                .expectSubscription()
-                .expectError(ResponseStatusException.class)
-                .verify();
-
     }
 
 }
