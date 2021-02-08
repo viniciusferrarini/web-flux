@@ -18,7 +18,7 @@ public class CustomAttributes extends DefaultErrorAttributes {
         if (throwable instanceof ResponseStatusException) {
             ResponseStatusException ex = (ResponseStatusException) throwable;
             errorAttributes.put("message", ex.getMessage());
-            errorAttributes.put("developerMessage", "A ResponseStatusException Happned");
+            errorAttributes.put("developerMessage", "A ResponseStatusException Happened");
         }
         return errorAttributes;
     }
