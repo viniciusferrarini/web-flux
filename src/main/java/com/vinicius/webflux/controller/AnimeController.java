@@ -2,6 +2,10 @@ package com.vinicius.webflux.controller;
 
 import com.vinicius.webflux.domain.Anime;
 import com.vinicius.webflux.service.AnimeService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -17,6 +21,11 @@ import java.util.List;
 @RestController
 @RequestMapping("anime")
 @Slf4j
+@SecurityScheme(
+        name = "Basic Authentication",
+        type = SecuritySchemeType.HTTP,
+        scheme = "basic"
+)
 public class AnimeController {
 
     private final AnimeService animeService;
@@ -24,6 +33,7 @@ public class AnimeController {
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "List all animes", tags = {"anime"}, security = @SecurityRequirement(name = "Basic Authentication"))
     public Flux<Anime> listAll() {
         return animeService.findAll();
     }

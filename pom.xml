@@ -17,8 +17,14 @@
         <java.version>11</java.version>
         <blockhound.version>1.0.4.RELEASE</blockhound.version>
         <r2dbc.version>0.8.6.RELEASE</r2dbc.version>
+        <openapi-webflux.version>1.5.2</openapi-webflux.version>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-webflux-ui</artifactId>
+            <version>${openapi-webflux.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
